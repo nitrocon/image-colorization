@@ -39,11 +39,11 @@ Here I'm going to give you some basic knowledge that you may need to understand 
 
 As you might know, when we load an image, we get a rank-3 (height, width, color) array with the last axis containing the color data for our image. These data represent color in RGB color space and there are 3 numbers for each pixel indicating how much Red, Green, and Blue the pixel is. In the following image you can see that in the left part of the "main image" (the leftmost image) we have blue color so in the blue channel of the image, that part has higher values and has turned dark.
 
-<img src="/files/rgb.png" width="65%">
+<img src="/files/rgb.jpg" width="65%">
 
 In L\*a\*b color space, we have again three numbers for each pixel but these numbers have different meanings. The first number (channel), L, encodes the Lightness of each pixel and when we visualize this channel (the second image in the row below) it appears as a black and white image. The \*a and \*b channels encode how much green-red and yellow-blue each pixel is, respectively. In the following image you can see each channel of L\*a\*b color space separately.
 
-<img src="/files/lab.png" width="65%">
+<img src="/files/lab.jpg" width="65%">
 
 In all papers I studied and all codes I checked out on colorization on GitHub, people use L\*a\*b color space instead of RGB to train the models. There are a couple of reasons for this choice but I'll give you an intuition of why we make this choice. To train a model for colorization, we should give it a grayscale image and hope that it will make it colorful. When using L\*a\*b, we can give the L channel to the model (which is the grayscale image) and want it to predict the other two channels (\*a, \*b) and after its prediction, we concatenate all the channels and we get our colorful image. But if you use RGB, you have to first convert your image to grayscale, feed the grayscale image to the model and hope it will predict 3 numbers for you which is a way more difficult and unstable task due to the many more possible combinations of 3 numbers compared to two numbers. If we assume we have 256 choices (in a 8-bit unsigned integer image this is the real number of choices) for each number, predicting the three numbers for each of the pixels is choosing between 256³ combinations which is more than 16 million choices, but when predicting two numbers we have about 65000 choices (actually, we are not going to wildly choose these numbers like a classification task and I just wrote these numbers to give you an intuition).
 
@@ -191,7 +191,7 @@ print(len(train_dl), len(val_dl))
 
 This one is a little complicated and needs explanation. This code implements a U-Net to be used as the generator of our GAN. The details of the code are out of the scope of this article but the important thing to understand is that it makes the U-Net from the middle part of it (down in the U shape) and adds down-sampling and up-sampling modules to the left and right of that middle module (respectively) at every iteration until it reaches the input module and output module. Look at the following image that I made from one of the images in the article to give you a better sense of what is happening in the code:
 
-![unet](./files/unet.png)
+<img src="/files/unet.png" width="65%">
 
 The blue rectangles show the order in which the related modules are built with the code. The U-Net we will build has more layers than what is depicted in this image but it suffices to give you the idea. Also notice in the code that we are going 8 layers down, so if we start with a 256 by 256 image, in the middle of the U-Net we will get a 1 by 1 (256 / 2⁸) image and then it gets up-sampled to produce a  256 by 256 image (with two channels). This code snippet is really exciting and I highly recommend to play with it to fully grasp what every line of it is doing.
 
@@ -550,7 +550,8 @@ Every epoch takes about 3 to 4 minutes on Colab. After about 20 epochs you shoul
 
 Okay. I let the model train for some longer (about 100 epochs). Here are the results of our baseline model:
 
-![baseline](./files/baseline.png)
+<img src="/files/baseline.png" width="65%">
+
 
 As you can see, although this baseline model has some basic understanding of some most common objects in images like sky, trees, … its output is far from something appealing and it cannot decide on the color of rare objects. It also displays some color spillovers and circle-shaped mass of color (center of first image of second row) which is not good at all. So, it seems like that with this small dataset we cannot get good results with this strategy. **Therefore, we change our strategy!**
 
@@ -647,14 +648,16 @@ One of the cool thing I found in my experiments was that the U-Net we built with
 
 Here I show you the outputs of the U-Net without adversarial training and U-Net with adversarial training to better depict the significant difference that the adversarial training is making in our case:
 
-![comparison](./files/comparison1.png)
+<img src="/files/comparison1.png" width="65%">
+
 (Left: pretrained U-Net without adversarial training | Right: pretrained U-Net with adversarial training)
 
 ---
 
 You can also see the GIF below to observe the difference between the images better:
 
-![anim](./files/anim_compare.gif)
+<img src="/files/anim_compare.gif" width="65%">
+
 (animation of the last two images to better see the significant difference that adversarial training is making)
 
 ---
