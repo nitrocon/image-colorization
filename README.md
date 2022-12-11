@@ -16,15 +16,15 @@ I highly recommend that you go through this tutorial in **colab** by simply clic
 
 ## Final model's output 
 
-![output 1](./files/main.png)
+<img src="/files/main.png" width="65%">
 Left: Input black & white images from test set | Right: the colorized outputs by the final model of this tutorial
 
 ---
-![output2](./files/img1.png)
+<img src="/files/img1.png" width="65%">
 Left: Input black & white images from test set | Right: the colorized outputs by the final model of this tutorial
 
 ---
-![output3](./files/img2.png)
+<img src="/files/img2.png" width="65%">
 Left: Input black & white images from test set | Right: the colorized outputs by the final model of this tutorial
 
 ---
@@ -39,11 +39,11 @@ Here I'm going to give you some basic knowledge that you may need to understand 
 
 As you might know, when we load an image, we get a rank-3 (height, width, color) array with the last axis containing the color data for our image. These data represent color in RGB color space and there are 3 numbers for each pixel indicating how much Red, Green, and Blue the pixel is. In the following image you can see that in the left part of the "main image" (the leftmost image) we have blue color so in the blue channel of the image, that part has higher values and has turned dark.
 
-![rgb image](./files/rgb.jpg)
+<img src="/files/rgb.png" width="65%">
 
 In L\*a\*b color space, we have again three numbers for each pixel but these numbers have different meanings. The first number (channel), L, encodes the Lightness of each pixel and when we visualize this channel (the second image in the row below) it appears as a black and white image. The \*a and \*b channels encode how much green-red and yellow-blue each pixel is, respectively. In the following image you can see each channel of L\*a\*b color space separately.
 
-![lab image](./files/lab.jpg)
+<img src="/files/lab.png" width="65%">
 
 In all papers I studied and all codes I checked out on colorization on GitHub, people use L\*a\*b color space instead of RGB to train the models. There are a couple of reasons for this choice but I'll give you an intuition of why we make this choice. To train a model for colorization, we should give it a grayscale image and hope that it will make it colorful. When using L\*a\*b, we can give the L channel to the model (which is the grayscale image) and want it to predict the other two channels (\*a, \*b) and after its prediction, we concatenate all the channels and we get our colorful image. But if you use RGB, you have to first convert your image to grayscale, feed the grayscale image to the model and hope it will predict 3 numbers for you which is a way more difficult and unstable task due to the many more possible combinations of 3 numbers compared to two numbers. If we assume we have 256 choices (in a 8-bit unsigned integer image this is the real number of choices) for each number, predicting the three numbers for each of the pixels is choosing between 256³ combinations which is more than 16 million choices, but when predicting two numbers we have about 65000 choices (actually, we are not going to wildly choose these numbers like a classification task and I just wrote these numbers to give you an intuition).
 
@@ -67,7 +67,7 @@ So what about the "condition" we mentioned? Well, that grayscale image which bot
 
 Let's take a look at the math. Consider _**x**_ as the grayscale image, _**z**_ as the input noise for the generator, and _**y**_ as the 2-channel output we want from the generator (it can also represent the 2 color channels of a real image). Also, _**G**_ is the generator model and _**D**_ is the discriminator. Then the loss for our conditional GAN will be:
 
-![GAN Loss](./files/GAN_loss.jpg)
+<img src="/files/GAN_loss.jpg" width="65%">
 
 Notice that _**x**_ is given to both models which is the condition we introduce two both players of this game. Actually, we are not going to feed a "n" dimensional vector of random noise to the generator as you might expect but the noise is introduced in the form of dropout layers (there is something cool about it which you will read in the last section of the article) in the generator architecture.
 
@@ -75,11 +75,11 @@ Notice that _**x**_ is given to both models which is the condition we introduce 
 
 The earlier loss function helps to produce good-looking colorful images that seem real, but to further help the models and introduce some supervision in our task, we combine this loss function with L1 Loss (you might know L1 loss as mean absolute error) of the predicted colors compared with the actual colors:
 
-![L1 loss](./files/l1_loss.jpg)
+<img src="/files/l1_loss.jpg" width="65%">
 
 If we use L1 loss alone, the model still learns to colorize the images but it will be conservative and most of the time uses colors like "gray" or "brown" because when it doubts which color is the best, it takes the average and uses these colors to reduce the L1 loss as much as possible (it is similar to the blurring effect of L1 or L2 loss in super resolution task). Also, the L1 Loss is preferred over L2 loss (or mean squared error) because it reduces that effect of producing gray-ish images. So, our combined loss function will be:
 
-![loss](./files/loss.jpg)
+<img src="/files/loss.jpg" width="65%">
 
 where _**λ**_ is a coefficient to balance the contribution of the two losses to the final loss (of course the discriminator loss does not involve the L1 loss).
 
