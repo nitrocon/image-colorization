@@ -9,9 +9,9 @@
 I highly recommend that you go through this tutorial in **colab** by simply clicking the **Open in Colab** badge below. You can train the models from scratch or downlaod the pretrained weights and use it to colorize your black & white images. All the tutorial explanations are included there as well.
 
 
-<h1 align="center">
+<h3 align="center">
   <img src="files/demo.jpg" width="65%"><br/>Test the Demo on Colab
-</h1>
+</h3>
 
 
 ## Final model's output 
