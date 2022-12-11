@@ -1,6 +1,6 @@
 # Image Colorization with U-Net and GAN Tutorial
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github.com/mberkay0/image-colorization/blob/main/ImageColorization.ipynb) 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/mberkay0/image-colorization/blob/main/ImageColorization.ipynb)
 
 **This is an advanced tutorial on _Image Colorization_ using deep learning and [PyTorch](https://pytorch.org/).**
 
