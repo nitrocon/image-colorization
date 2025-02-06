@@ -1,0 +1,10 @@
+cd Image_Colorization_Tutorial
+C:/Users/Nitrocon/AppData/Local/Programs/Python/Python310/python.exe -m venv venv
+source venv/Scripts/activate
+python.exe -m pip install --upgrade pip
+pip install -r requirements.txt
+python main.py
+
+torch
+torchvision
+--extra-index-url https://download.pytorch.org/whl/cu124
