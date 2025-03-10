@@ -1,0 +1,23 @@
+cd Supercolor
+"C:/Users/Nitrocon/AppData/Local/Programs/Python/Python312/python.exe" -m venv venv
+source venv/Scripts/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python main.py
+
+Parameter List 512x512:
+shufflenetv2x0.5: 5,714,129
+shufflenetv2x1.0: 19,428,737
+shufflenetv2x1.5: 40,862,961
+shufflenetv2x2.0: 75,720,113
+efficientNet_b0: 101,862,549
+resnet18: 33,865,305
+resnet34: 43,973,465
+resnet50: 341,808,473
+
+
+python -m nuitka --standalone --onefile \
+--enable-plugin=tk-inter \
+--windows-icon-from-ico=icon.ico \
+--windows-console-mode=disable \
+core.py

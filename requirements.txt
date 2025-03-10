@@ -1,0 +1,11 @@
+fastai
+Pillow
+scikit-image
+numpy
+PyQt6
+tqdm
+torch
+torchvision
+torchaudio
+--extra-index-url https://download.pytorch.org/whl/cu124
+
