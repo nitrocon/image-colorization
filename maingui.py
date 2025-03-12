@@ -74,10 +74,10 @@ HYPERPARAMS = {
     "n_down": 3,  # Anzahl der Downsampling-Schichten im Discriminator
 
     # Image Augmentation Hyperparameter
-    "brightness_range": (-1.0, 1.0),  # Bereich für die Helligkeitsanpassung
-    "contrast_range": (-1.0, 1.0),  # Bereich für die Kontrastanpassung
-    "saturation_range": (1.00, 2.0),  # Bereich für die Sättigungsanpassung
-    "distortion_scale": 0.2,  # Stärke der perspektivischen Verzerrung
+    "brightness_range": (-0.02, 0.02),  # Bereich für die Helligkeitsanpassung
+    "contrast_range": (-0.03, 0.02),  # Bereich für die Kontrastanpassung
+    "saturation_range": (1.00, 1.05),  # Bereich für die Sättigungsanpassung
+    "distortion_scale": 0.1,  # Stärke der perspektivischen Verzerrung
     "gaussian_blur_kernel_size": 3,  # Kernelgröße für den Gaußschen Weichzeichner
     "gaussian_blur_sigma": (0.1, 2.0),  # Sigma-Werte für den Gaußschen Weichzeichner
     "random_rotation_degrees": 45,  # Grad der zufälligen Rotation
@@ -320,51 +320,44 @@ class AdjustBrightnessContrastSaturation:
         return img
 
 class RandomResize:
-    def __init__(self, sizes):
-        self.sizes = sizes
+    def __init__(self, image_size):
+        self.image_size = image_size
+        self.sizes = [int(image_size / (2 ** i)) for i in list(range(int(np.log2(image_size / 16)))) + [0]]
+        self.sizes.append(16)
 
     def __call__(self, img):
         new_size = random.choice(self.sizes)
-        img = transforms.functional.resize(img, new_size)
-        img = transforms.functional.resize(img, (HYPERPARAMS["image_size"], HYPERPARAMS["image_size"]))
+        img = transforms.functional.resize(img, (new_size, new_size))
+        img = transforms.functional.resize(img, (self.image_size, self.image_size))
         return img
 
 class ColorizationDataset(Dataset):
     def __init__(self, paths, split='train', device=None, num_augmentations=HYPERPARAMS["num_augmentations"]):
         self.num_augmentations = num_augmentations
-        
-        # Einmalige Transformationen (Resize und RandomResize)
         self.initial_transforms = transforms.Compose([
             transforms.Resize((HYPERPARAMS["image_size"], HYPERPARAMS["image_size"])),
-            transforms.RandomApply([RandomResize([(32, 32), (64, 64), (128, 128), (256, 256)])], p=0.5),
+            transforms.RandomApply([RandomResize(HYPERPARAMS["image_size"])], p=0.75),
+            transforms.Resize((HYPERPARAMS["image_size"], HYPERPARAMS["image_size"])),
         ])
-        
-        # Wiederholte Augmentierungen (nur für das Training)
         if split == 'train':
             self.augmentation_transforms = transforms.Compose([
+                transforms.RandomApply([AdjustBrightnessContrastSaturation()], p=0.5),
                 transforms.RandomHorizontalFlip(p=HYPERPARAMS["random_horizontal_flip_p"]),
                 transforms.RandomApply([transforms.RandomRotation(HYPERPARAMS["random_rotation_degrees"])], p=0.5),
-                transforms.RandomApply([AdjustBrightnessContrastSaturation()], p=0.5),
                 transforms.RandomPerspective(distortion_scale=HYPERPARAMS["distortion_scale"], p=HYPERPARAMS["random_perspective_p"]),
                 transforms.RandomApply([transforms.GaussianBlur(kernel_size=HYPERPARAMS["gaussian_blur_kernel_size"], sigma=HYPERPARAMS["gaussian_blur_sigma"])], p=0.5),
             ])
         elif split == 'val':
-            self.augmentation_transforms = transforms.Compose([])  # Keine Augmentierungen für die Validierung
-        
+            self.augmentation_transforms = transforms.Compose([])
         self.split = split
         self.size = HYPERPARAMS["image_size"]
         self.paths = paths
         self.device = device
     
     def __getitem__(self, idx):
-        img = Image.open(self.paths[idx // self.num_augmentations]).convert("RGB")  # Repeated Augmentation
-        
-        # Einmalige Transformationen anwenden
+        img = Image.open(self.paths[idx // self.num_augmentations]).convert("RGB")
         img = self.initial_transforms(img)
-        
-        # Wiederholte Augmentierungen anwenden (nur für das Training)
         img = self.augmentation_transforms(img)
-        
         img = np.array(img)
         img_lab = rgb2lab(img).astype("float32")
         img_lab = transforms.ToTensor()(img_lab)
@@ -373,7 +366,7 @@ class ColorizationDataset(Dataset):
         return {'L': L.to(self.device), 'ab': ab.to(self.device)}
     
     def __len__(self):
-        return len(self.paths) * self.num_augmentations  # Erhöhe die Länge des Datensatzes um die Anzahl der Augmentierungen
+        return len(self.paths) * self.num_augmentations
 
 def make_dataloaders(batch_size=HYPERPARAMS["batch_size"], n_workers=HYPERPARAMS["n_workers"], pin_memory=HYPERPARAMS["pin_memory"], **kwargs):
     dataset = ColorizationDataset(**kwargs)
@@ -646,7 +639,8 @@ class GANTrainingThread(QThread):
         model_name, 
         architecture, 
         version_major,  # Übergeben Sie version_major
-        version_letter   # Übergeben Sie version_letter
+        version_letter,  # Übergeben Sie version_letter
+        infobox1  # Übergeben Sie das infobox1-Widget
     ):
         super().__init__()
         self.model = model
@@ -674,6 +668,7 @@ class GANTrainingThread(QThread):
         self.stop_event = threading.Event()
         self.accumulation_steps = HYPERPARAMS["gradient_accumulation_steps"]
         self.scaler = torch.amp.GradScaler('cuda')
+        self.infobox1 = infobox1  # Speichern Sie das infobox1-Widget
 
     def calculate_l2_regularization(self):
         l2_reg = 0.0
@@ -681,6 +676,28 @@ class GANTrainingThread(QThread):
             if param.requires_grad:
                 l2_reg += torch.norm(param, p=2)
         return l2_reg.item()
+
+    def save_model(self, epoch):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_path = os.path.join(
+            self.save_dir,
+            f"{self.model.architecture}_{self.model_name}_{self.nickname}_v{self.version}_epoch{epoch}_{timestamp}.pth"
+        )
+
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': self.model.net_G.state_dict(),
+            'discriminator_state_dict': self.model.net_G.discriminator.state_dict(),
+            'optimizer_G_state_dict': self.model.opt_G.state_dict(),
+            'optimizer_D_state_dict': self.model.opt_D.state_dict(),
+            'loss': self.min_loss,
+            'nickname': self.nickname,
+            'model_name': self.model_name,
+            'version': self.version, 
+            'architecture': self.model.architecture,
+        }, model_path)
+
+        self.infobox1.append(f"Model saved as {model_path}")  # Verwenden Sie self.infobox1
 
     def run(self):
         self.start_time = time.time()
@@ -774,6 +791,10 @@ class GANTrainingThread(QThread):
             
             logger.info(epoch_summary)
             self.update_progress.emit(100, epoch_summary, elapsed_time_str, epoch_elapsed_time_str, estimated_epoch_time_str, estimated_total_time_str, it_s_str)
+
+            # Speichern des Modells alle 5 Epochen
+            if (self.epoch + 1) % 5 == 0:
+                self.save_model(self.epoch + 1)
 
         self.gan_training_finished.emit("") 
 
@@ -1304,6 +1325,7 @@ class MainWindow(QMainWindow):
             self.architecture_dropdown.currentData(),
             self.version_major,  # Übergeben Sie version_major
             self.version_letter,  # Übergeben Sie version_letter
+            self.infobox1  # Übergeben Sie das infobox1-Widget
         )
 
         self.gan_training_thread.update_progress.connect(self.update_progress)
@@ -1332,6 +1354,7 @@ class MainWindow(QMainWindow):
             self.architecture_dropdown.currentData(),
             self.version_major,  # Übergeben Sie version_major
             self.version_letter,  # Übergeben Sie version_letter
+            self.infobox1  # Übergeben Sie das infobox1-Widget
         )
 
         self.gan_training_thread.update_progress.connect(self.update_progress)
