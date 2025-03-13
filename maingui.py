@@ -17,7 +17,7 @@ import numpy as np
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, 
     QLineEdit, QMessageBox, QProgressBar, QTextEdit, QComboBox, QHBoxLayout, QSplitter, QGroupBox,
-    QSpacerItem, QSizePolicy  # Füge diese Imports hinzu
+    QSpacerItem, QSizePolicy
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QThread
 from PyQt6.QtGui import QFont
@@ -39,76 +39,65 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 HYPERPARAMS = {
-    # Training Hyperparameter
-    "lambda_L1": 100.0,  # Gewichtung für den L1-Verlust
-    "lr_G": 2e-4,  # Lernrate für den Generator
-    "lr_D": 1.75e-4,  # Lernrate für den Discriminator
-    "beta1": 0.5,  # Beta1 für den Adam-Optimierer
-    "beta2": 0.999,  # Beta2 für den Adam-Optimierer
-    "dropout_rate": 0.3,  # Dropout-Rate
-    "batch_size": 2,  # Batch-Größe
-    "n_workers": 4,  # Anzahl der Worker für den DataLoader
-    "pin_memory": True,  # Pin Memory für den DataLoader
-    "image_size": 512,  # Größe der Bilder
-    "generator_train_epochs": 10,  # Anzahl der Epochen für das Generator-Training
-    "gan_train_epochs": 100,  # Anzahl der Epochen für das GAN-Training
-    "warmup_epochs": 5,  # Anzahl der Warmup-Epochen
-    "patience": 5,  # Anzahl der Epochen ohne Verbesserung, bevor das Training gestoppt wird
-    "gradient_accumulation_steps": 4,  # Anzahl der Gradientenakkumulationsschritte
-    "weight_decay": 2e-5,  # Gewichtsabnahme (L2-Regularisierung)
-    "initial_lr": 1e-4,  # Anfängliche Lernrate
-    "train_split": 0.99,  # Anteil der Trainingsdaten
-    "val_split": 0.01,  # Anteil der Validierungsdaten
-    "cosine_annealing_eta_min": 0,  # Minimale Lernrate für Cosine Annealing
-    "cosine_annealing_T_max": 200,  # Maximale Anzahl von Epochen für Cosine Annealing
-
-    # Model Hyperparameter
-    "nickname": "nitrocon",  # Nickname für das Modell
-    "model_name": "Supercolor",  # Name des Modells
-    "version": "00a",  # Version des Modells
-    "gan_mode": "vanilla",  # GAN-Modus (vanilla oder lsgan)
-    "real_label": 1.0,  # Label für echte Bilder
-    "fake_label": 0.0,  # Label für gefälschte Bilder
-    "optimizer_betas": (0.5, 0.999),  # Betas für den Optimierer
-    "num_filters": 64,  # Anzahl der Filter im Discriminator
-    "n_down": 3,  # Anzahl der Downsampling-Schichten im Discriminator
-
-    # Image Augmentation Hyperparameter
-    "brightness_range": (-0.02, 0.02),  # Bereich für die Helligkeitsanpassung
-    "contrast_range": (-0.03, 0.02),  # Bereich für die Kontrastanpassung
-    "saturation_range": (1.00, 1.05),  # Bereich für die Sättigungsanpassung
-    "distortion_scale": 0.1,  # Stärke der perspektivischen Verzerrung
-    "gaussian_blur_kernel_size": 3,  # Kernelgröße für den Gaußschen Weichzeichner
-    "gaussian_blur_sigma": (0.1, 2.0),  # Sigma-Werte für den Gaußschen Weichzeichner
-    "random_rotation_degrees": 45,  # Grad der zufälligen Rotation
-    "random_perspective_p": 0.5,  # Wahrscheinlichkeit für die Anwendung der perspektivischen Verzerrung
-    "random_horizontal_flip_p": 0.5,  # Wahrscheinlichkeit für die horizontale Spiegelung
-    "num_augmentations": 1,  # Anzahl der Augmentierungen pro Bild für Repeated Augmentation
-
-    # GUI Hyperparameter
-    "app_width": 1250,  # Breite der Anwendung
-    "app_height": 565,  # Höhe der Anwendung
-    "gui1_width": 220,  # Breite des ersten GUI-Panels
-    "gui2_width": 270,  # Breite des zweiten GUI-Panels
-    "infobox1_width": 250,  # Breite der Infobox 1
-    "epochs_groupbox_height": 60,  # Höhe der Epochen-GroupBox
-    "groupbox_margins": 5,  # Ränder der GroupBox
+    "lambda_L1": 100.0,
+    "lr_G": 2e-4,
+    "lr_D": 2e-4,
+    "beta1": 0.5,
+    "beta2": 0.999,
+    "dropout_rate": 0.3,
+    "batch_size": 2,
+    "n_workers": 4,
+    "pin_memory": True,
+    "image_size": 512,
+    "generator_train_epochs": 10,
+    "gan_train_epochs": 100,
+    "warmup_epochs": 5,
+    "patience": 5,
+    "gradient_accumulation_steps": 4,
+    "weight_decay": 2e-5,
+    "initial_lr": 1e-4,
+    "train_split": 0.99,
+    "val_split": 0.01,
+    "cosine_annealing_eta_min": 0,
+    "cosine_annealing_T_max": 200,
+    "nickname": "nitrocon",
+    "model_name": "Supercolor",
+    "version": "00a",
+    "gan_mode": "vanilla",
+    "real_label": 1.0,
+    "fake_label": 0.0,
+    "optimizer_betas": (0.5, 0.999),
+    "num_filters": 64,
+    "n_down": 3,
+    "brightness_range": (-0.02, 0.02),
+    "contrast_range": (-0.03, 0.02),
+    "saturation_range": (1.00, 1.05),
+    "distortion_scale": 0.1,
+    "gaussian_blur_kernel_size": 3,
+    "gaussian_blur_sigma": (0.1, 2.0),
+    "random_rotation_degrees": 45,
+    "random_perspective_p": 0.5,
+    "random_horizontal_flip_p": 0.5,
+    "num_augmentations": 1,
+    "app_width": 1250,
+    "app_height": 565,
+    "gui1_width": 220,
+    "gui2_width": 270,
+    "infobox1_width": 250,
+    "epochs_groupbox_height": 60,
+    "groupbox_margins": 5,
     "widget_spacing": 0,
     "widget_height": 50,
-
-    # Mixed Precision Training
-    "grad_scaler_enabled": True,  # Aktiviert den Gradient Scaler für Mixed Precision Training
-    "grad_scaler_init_scale": 65536.0,  # Initialer Skalierungsfaktor für den Gradient Scaler
-    "grad_scaler_growth_factor": 2.0,  # Wachstumsfaktor für den Gradient Scaler
-    "grad_scaler_backoff_factor": 0.5,  # Backoff-Faktor für den Gradient Scaler
-    "grad_scaler_growth_interval": 2000,  # Intervall für das Wachstum des Gradient Scalers
-    "grad_scaler_enabled_for_backward": True,  # Aktiviert den Gradient Scaler für Backward Pass
-
-    # Supported Image Formats
-    "supported_image_extensions": ['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.tiff'],  # Unterstützte Bildformate
-    "max_image_length": 25,  # Maximale Länge des Bildpfads in der GUI
-    "save_dir": "models",  # Verzeichnis zum Speichern der Modelle
-    "colorized_folder_name": "colorized",  # Name des Ordners für colorisierte Bilder
+    "grad_scaler_enabled": True,
+    "grad_scaler_init_scale": 65536.0,
+    "grad_scaler_growth_factor": 2.0,
+    "grad_scaler_backoff_factor": 0.5,
+    "grad_scaler_growth_interval": 2000,
+    "grad_scaler_enabled_for_backward": True,
+    "supported_image_extensions": ['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.tiff'],
+    "max_image_length": 25,
+    "save_dir": "models",
+    "colorized_folder_name": "colorized",
 }
 
 def get_device():
@@ -187,12 +176,12 @@ class MainModel(nn.Module):
         super().__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.lambda_L1 = lambda_L1
-        self.epoch = 0  # Initialize self.epoch
-        self.batch_idx = 0  # Initialize self.batch_idx
+        self.epoch = 0
+        self.batch_idx = 0
         self.nickname = nickname
         self.model_name = model_name
         self.version = version
-        self.architecture = architecture  # Speichere die Architektur
+        self.architecture = architecture
         
         if net_G is None:
             if architecture == "resnet18":
@@ -229,18 +218,17 @@ class MainModel(nn.Module):
         self.GANcriterion = GANLoss(gan_mode=HYPERPARAMS["gan_mode"]).to(self.device)
         self.L1criterion = nn.L1Loss()
         
-        # Optimizer with L2 Regularization (weight_decay)
         self.opt_G = optim.Adam(
             self.net_G.parameters(), 
             lr=lr_G, 
             betas=(beta1, beta2), 
-            weight_decay=HYPERPARAMS["weight_decay"]  # L2 Regularization
+            weight_decay=HYPERPARAMS["weight_decay"]
         )
         self.opt_D = optim.Adam(
             self.net_G.discriminator.parameters(), 
             lr=lr_D, 
             betas=(beta1, beta2), 
-            weight_decay=HYPERPARAMS["weight_decay"]  # L2 Regularization
+            weight_decay=HYPERPARAMS["weight_decay"]
         )
 
     def set_requires_grad(self, model, requires_grad=True):
@@ -375,7 +363,7 @@ def make_dataloaders(batch_size=HYPERPARAMS["batch_size"], n_workers=HYPERPARAMS
     return dataloader
 
 class DataPreparationThread(QThread):
-    data_prepared = pyqtSignal(list, list)  # Signal for train_paths and val_paths
+    data_prepared = pyqtSignal(list, list)
 
     def __init__(self, folder_path):
         super().__init__()
@@ -391,7 +379,7 @@ class DataPreparationThread(QThread):
         self.data_prepared.emit(train_paths, val_paths)
 
 class ModelLoadingThread(QThread):
-    model_loaded = pyqtSignal(object)  # Signal for the loaded model
+    model_loaded = pyqtSignal(object)
 
     def __init__(self, file_path, device):
         super().__init__()
@@ -462,19 +450,18 @@ class GeneratorTrainingThread(QThread):
         self.start_time = None
         self.batches_processed = 0
         self.total_batches = len(self.train_dl)
-        self.stop_event = threading.Event()  # Event zum Stoppen des Threads
+        self.stop_event = threading.Event()
         self.accumulation_steps = HYPERPARAMS["gradient_accumulation_steps"]
         self.criterion = nn.L1Loss()
         self.scaler = torch.amp.GradScaler('cuda')
         self.best_loss = float('inf')
         self.patience = 5  
         self.patience_counter = 0
-        self.scheduler = None  # Wird nach der Warmup-Phase initialisiert
+        self.scheduler = None
         self.text_area = text_area 
-        self.warmup_epochs = warmup_epochs  # Warmup-Epochen als Parameter übergeben
+        self.warmup_epochs = warmup_epochs
 
     def adjust_learning_rate_warmup(self, epoch):
-        """Linear warmup for the first `warmup_epochs` epochs."""
         if epoch < self.warmup_epochs:
             lr = HYPERPARAMS["initial_lr"] * (epoch + 1) / self.warmup_epochs
             for param_group in self.optimizer.param_groups:
@@ -485,7 +472,6 @@ class GeneratorTrainingThread(QThread):
         self.net_G.to(self.device)
         self.net_G.train()
 
-        # Nur Warmup-Nachricht ausgeben, wenn warmup_epochs > 0
         if self.warmup_epochs > 0:
             self.text_area.append(f"Starting WarmUp {self.warmup_epochs} Epochs with learning rate: {HYPERPARAMS['initial_lr'] / self.warmup_epochs:.7f}")
         else:
@@ -493,24 +479,21 @@ class GeneratorTrainingThread(QThread):
 
         self.optimizer = optim.Adam(self.net_G.parameters(), lr=HYPERPARAMS["initial_lr"], betas=HYPERPARAMS["optimizer_betas"], weight_decay=HYPERPARAMS["weight_decay"])
 
-        # Cosine Annealing Scheduler nach der Warmup-Phase initialisieren
         self.scheduler = CosineAnnealingLR(
             self.optimizer, 
-            T_max=self.max_epochs - self.warmup_epochs,  # Anzahl der Epochen für Cosine Annealing
-            eta_min=0  # Minimale Learning Rate
+            T_max=self.max_epochs - self.warmup_epochs,
+            eta_min=0
         )
 
         for self.epoch in range(self.max_epochs):
             if self.stop_event.is_set():
                 break
 
-            # Warmup-Phase: Learning Rate linear erhöhen (nur wenn warmup_epochs > 0)
             if self.warmup_epochs > 0 and self.epoch < self.warmup_epochs:
                 self.adjust_learning_rate_warmup(self.epoch)
                 current_lr = self.optimizer.param_groups[0]['lr']
                 logger.info(f"Warmup Epoch {self.epoch + 1}, Learning Rate: {current_lr}")
             else:
-                # Cosine Annealing: Learning Rate anpassen
                 self.scheduler.step()
                 current_lr = self.optimizer.param_groups[0]['lr']
                 logger.info(f"Cosine Annealing Epoch {self.epoch + 1}, Learning Rate: {current_lr}")
@@ -573,28 +556,24 @@ class GeneratorTrainingThread(QThread):
                     it_s_str
                 )
 
-            # Überprüfen, ob der Verlust sich verbessert hat
             if loss_meter.avg < self.best_loss:
                 self.best_loss = loss_meter.avg
                 self.patience_counter = 0
             else:
                 self.patience_counter += 1
 
-            # Lernrate anpassen und ausgeben, wenn sie reduziert wird
             old_lr = self.optimizer.param_groups[0]['lr']
             self.scheduler.step(loss_meter.avg)
             new_lr = self.optimizer.param_groups[0]['lr']
 
             if new_lr < old_lr:
                 lr_message = f"Learning rate reduced from {old_lr:.6f} to {new_lr:.6f}"
-                self.text_area.append(lr_message)  # Nachricht direkt an die text_area (infobox1) senden
+                self.text_area.append(lr_message)
 
-            # Wenn der Verlust sich über mehrere Epochen nicht verbessert hat, stoppen wir das Training
             if self.patience_counter >= self.patience:
-                self.text_area.append(f"Early stopping after {self.patience} epochs without improvement.")  # Nachricht direkt an die text_area (infobox1) senden
+                self.text_area.append(f"Early stopping after {self.patience} epochs without improvement.")
                 break
 
-            # Lernrate in der Epochen-Zusammenfassung anzeigen
             epoch_summary = f"=== Generator Training Epoch {self.epoch + 1} Summary ===\n"
             epoch_summary += f"- Training Loss: {loss_meter.avg:.4f}\n"
             epoch_summary += f"- L2 Regularization: {l2_reg_meter.avg:.4f}\n"
@@ -634,13 +613,13 @@ class GANTrainingThread(QThread):
         criterion_L1, 
         save_dir, 
         max_epochs, 
-        version,  # Hier wird self.version übergeben
+        version, 
         nickname, 
         model_name, 
         architecture, 
-        version_major,  # Übergeben Sie version_major
-        version_letter,  # Übergeben Sie version_letter
-        infobox1  # Übergeben Sie das infobox1-Widget
+        version_major, 
+        version_letter, 
+        infobox1
     ):
         super().__init__()
         self.model = model
@@ -655,11 +634,11 @@ class GANTrainingThread(QThread):
         self.max_epochs = max_epochs
         self.epoch = 0
         self.min_loss = float('inf')
-        self.version = version  # Hier wird self.version gespeichert
+        self.version = version
         self.nickname = nickname
         self.model_name = model_name
         self.architecture = architecture
-        self.version_major = version_major  # Versionierungsattribute
+        self.version_major = version_major
         self.version_letter = version_letter
         self.start_time = None
         self.batches_processed = 0
@@ -668,7 +647,7 @@ class GANTrainingThread(QThread):
         self.stop_event = threading.Event()
         self.accumulation_steps = HYPERPARAMS["gradient_accumulation_steps"]
         self.scaler = torch.amp.GradScaler('cuda')
-        self.infobox1 = infobox1  # Speichern Sie das infobox1-Widget
+        self.infobox1 = infobox1
 
     def calculate_l2_regularization(self):
         l2_reg = 0.0
@@ -697,7 +676,7 @@ class GANTrainingThread(QThread):
             'architecture': self.model.architecture,
         }, model_path)
 
-        self.infobox1.append(f"Model saved as {model_path}")  # Verwenden Sie self.infobox1
+        self.infobox1.append(f"Model saved as {model_path}")
 
     def run(self):
         self.start_time = time.time()
@@ -792,7 +771,6 @@ class GANTrainingThread(QThread):
             logger.info(epoch_summary)
             self.update_progress.emit(100, epoch_summary, elapsed_time_str, epoch_elapsed_time_str, estimated_epoch_time_str, estimated_total_time_str, it_s_str)
 
-            # Speichern des Modells alle 5 Epochen
             if (self.epoch + 1) % 5 == 0:
                 self.save_model(self.epoch + 1)
 
@@ -907,7 +885,6 @@ class ColorizationThread(QThread):
 
             logger.info(f"Saved colorized image: {output_img_path} ({processed_images}/{total_images})")
 
-            # Clear GPU memory after each image
             clear_gpu_memory()
 
         logger.info("Colorization completed.")
@@ -960,7 +937,6 @@ class MainWindow(QMainWindow):
     def initUI(self):
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        # GUI 1 Panel
         gui1_panel = QWidget()
         gui1_layout = QVBoxLayout()
 
@@ -1035,33 +1011,27 @@ class MainWindow(QMainWindow):
         self.it_s_label = QLabel("Iterations/s: 0.0 it/s", self)
         button_layout.addWidget(self.it_s_label)
 
-        # Füge das status_label über der progress_bar hinzu
         self.status_label = QLabel("Select Folder to Start")
         self.status_label.setWordWrap(True)
         button_layout.addWidget(self.status_label)
         self.status_label.setFixedHeight(30)
 
-        # Progressbar in das gleiche Layout einfügen
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setValue(0)
         button_layout.addWidget(self.progress_bar)
 
-        # Dynamischer Spacer, der den verbleibenden Platz füllt
         spacer = QSpacerItem(20, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         button_layout.addSpacerItem(spacer)
 
         gui1_layout.addLayout(button_layout)
 
-        # Setze die feste Höhe für das gui1_panel
         gui1_panel.setFixedHeight(HYPERPARAMS["app_height"])
         gui1_panel.setLayout(gui1_layout)
         gui1_panel.setFixedWidth(HYPERPARAMS["gui1_width"])
 
-        # GUI 2 Panel
         gui2_panel = QWidget()
         gui2_layout = QVBoxLayout()
 
-        # Fach 1: Epochs - Training (GroupBox)
         epochs_group = QGroupBox("Epochs - Training")
         epochs_layout = QHBoxLayout()
         epochs_layout.setSpacing(HYPERPARAMS["widget_spacing"])
@@ -1085,10 +1055,9 @@ class MainWindow(QMainWindow):
         epochs_layout.addWidget(self.gan_epoch_input)
 
         epochs_group.setLayout(epochs_layout)
-        epochs_group.setFixedHeight(HYPERPARAMS["epochs_groupbox_height"])  # Feste Höhe für Fach 1
+        epochs_group.setFixedHeight(HYPERPARAMS["epochs_groupbox_height"])
         gui2_layout.addWidget(epochs_group)
 
-        # Fach 2: Batch Size und Image Size
         batch_size_layout = QHBoxLayout()
         batch_size_layout.setSpacing(HYPERPARAMS["widget_spacing"])
 
@@ -1108,10 +1077,9 @@ class MainWindow(QMainWindow):
 
         batch_size_widget = QWidget()
         batch_size_widget.setLayout(batch_size_layout)
-        batch_size_widget.setFixedHeight(HYPERPARAMS["widget_height"])  # Feste Höhe für Fach 2
+        batch_size_widget.setFixedHeight(HYPERPARAMS["widget_height"])
         gui2_layout.addWidget(batch_size_widget)
 
-        # Fach 3: Theme Dropdown
         theme_layout = QHBoxLayout()
         theme_layout.setSpacing(HYPERPARAMS["widget_spacing"])
 
@@ -1125,25 +1093,21 @@ class MainWindow(QMainWindow):
 
         theme_widget = QWidget()
         theme_widget.setLayout(theme_layout)
-        theme_widget.setFixedHeight(HYPERPARAMS["widget_height"])  # Feste Höhe für Fach 3
+        theme_widget.setFixedHeight(HYPERPARAMS["widget_height"])
         gui2_layout.addWidget(theme_widget)
 
-        # Fach 4 bis 10: Leer, aber mit fester Höhe
         for i in range(4, 11):
             empty_widget = QWidget()
-            empty_widget.setFixedHeight(HYPERPARAMS["widget_height"])  # Feste Höhe für jedes Fach
+            empty_widget.setFixedHeight(HYPERPARAMS["widget_height"])
             gui2_layout.addWidget(empty_widget)
 
-        # Feste Gesamthöhe für GUI 2
         gui2_panel.setLayout(gui2_layout)
         gui2_panel.setFixedWidth(HYPERPARAMS["gui2_width"])
 
-        # Infobox 1 (zwischen GUI2 und Infobox 2)
         self.infobox1 = QTextEdit(self)
         self.infobox1.setReadOnly(True)
         self.infobox1.setFixedWidth(HYPERPARAMS["infobox1_width"])
 
-        # Infobox 2
         self.infobox2 = QTextEdit(self)
         self.infobox2.setReadOnly(True)
         self.infobox2.setFixedWidth(HYPERPARAMS["app_width"] - HYPERPARAMS["gui1_width"] - HYPERPARAMS["gui2_width"] - HYPERPARAMS["infobox1_width"])
@@ -1155,7 +1119,6 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(splitter)
 
-        # Now that text_area is initialized, append the device info
         self.infobox1.append(self.device_info)
 
     def change_theme(self, theme_name):
@@ -1279,10 +1242,8 @@ class MainWindow(QMainWindow):
         self.nickname = self.nickname_input.text()
         self.model_name = self.model_name_input.text()
 
-        # Warmup-Epochen aus dem GUI auslesen
         warmup_epochs = int(self.warmup_epochs_input.text())
 
-        # Überprüfen, ob das Generator-Training übersprungen werden soll
         if warmup_epochs == 0 and max_epochs_generator == 0:
             self.infobox1.append("Skipping Generator Training. Starting GAN training directly...")
             self.start_gan_training()
@@ -1297,7 +1258,7 @@ class MainWindow(QMainWindow):
                 model_name=self.model_name,
                 architecture=selected_architecture,
                 text_area=self.infobox1,
-                warmup_epochs=warmup_epochs  # Warmup-Epochen übergeben
+                warmup_epochs=warmup_epochs
             )
             self.generator_training_thread.update_progress.connect(self.update_progress)
             self.generator_training_thread.update_progress.connect(self.update_infobox2)
@@ -1323,9 +1284,9 @@ class MainWindow(QMainWindow):
             self.nickname, 
             self.model_name, 
             self.architecture_dropdown.currentData(),
-            self.version_major,  # Übergeben Sie version_major
-            self.version_letter,  # Übergeben Sie version_letter
-            self.infobox1  # Übergeben Sie das infobox1-Widget
+            self.version_major, 
+            self.version_letter, 
+            self.infobox1
         )
 
         self.gan_training_thread.update_progress.connect(self.update_progress)
@@ -1352,9 +1313,9 @@ class MainWindow(QMainWindow):
             self.nickname, 
             self.model_name, 
             self.architecture_dropdown.currentData(),
-            self.version_major,  # Übergeben Sie version_major
-            self.version_letter,  # Übergeben Sie version_letter
-            self.infobox1  # Übergeben Sie das infobox1-Widget
+            self.version_major, 
+            self.version_letter, 
+            self.infobox1
         )
 
         self.gan_training_thread.update_progress.connect(self.update_progress)
@@ -1455,8 +1416,7 @@ class MainWindow(QMainWindow):
         self.model_name = self.model.model_name
         self.version = self.model.version
 
-        # Extrahieren Sie die Versionsnummer aus der geladenen Version
-        if len(self.version) == 3:  # Annahme: Das Format ist immer "02a", "03b", usw.
+        if len(self.version) == 3:
             self.version_major = int(self.version[:2])
             self.version_letter = self.version[2]
         else:
@@ -1467,7 +1427,6 @@ class MainWindow(QMainWindow):
         self.nickname_input.setText(self.nickname)
         self.model_name_input.setText(self.model_name)
 
-        # Setze die Architektur im Dropdown-Menü basierend auf dem geladenen Modell
         architecture = self.model.architecture if hasattr(self.model, 'architecture') else 'resnet18'
         index = self.architecture_dropdown.findData(architecture)
         if index >= 0:
