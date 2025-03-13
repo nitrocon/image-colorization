@@ -14,7 +14,7 @@ Supercolor is a PyQt6-based GUI application that uses deep learning models to co
 - **Model Selection**: Choose from multiple architectures like ResNet, EfficientNet, and ShuffleNet.
 - **GPU Acceleration**: Utilizes CUDA if available for faster processing.
 - **Batch Processing**: Supports colorizing multiple images at once.
-- **Custom Training**: Train your own model with a dataset of grayscale images.
+- **Custom Training**: Train and fine-tune a model using a dataset of RGB images, where the model learns to predict color information from grayscale input in the L*a*b* color space.
 - **Auto-Save Checkpoints**: Automatically saves the model at regular intervals.
 - **Adjustable Warm-Up for Generator Training**: Customize warm-up epochs before full training.
 - **GAN Training with Pretrained Generator**: Start GAN training with a pretrained generator.
@@ -42,8 +42,9 @@ python maingui.py
 ```
 
 ### Training Process
-Supercolor follows a structured training process involving a **Generator Pretraining Phase** followed by **GAN Training**.
-**Set WarmUp and Gen. to 0 to skip Pretraining and start GAN directly.**
+### Training Process
+Supercolor operates in the **L*a*b*** color space, where grayscale input represents the L-channel (lightness), and the model predicts the a and b color channels.
+Supercolor follows a structured training process involving a **Generator Pretraining Phase** followed by **GAN Training**. **Set WarmUp and Gen. to 0 to skip Pretraining and start GAN directly.**
 
 #### 1. Generator Pretraining
 - The generator is trained **without a discriminator** using L1 loss.
