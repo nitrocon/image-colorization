@@ -1,8 +1,8 @@
 forked from https://github.com/mberkay0/image-colorization
-Thanks a lot for youre paper in GANs and the code youre sharing with us, that helped a lot making this App.
+Thanks a lot for your paper on GANs and the code you're sharing with us, that helped a lot in making this App.
 
-Tested with python 3.12, py version is limited to fastAI compatibility
-I am using https://github.com/Eugeny/tabby and https://git-scm.com/downloads/win to run the windows App.
+Tested with Python 3.12, Py version is limited to fastAI compatibility.
+I am using https://github.com/Eugeny/tabby and https://git-scm.com/downloads/win to run the Windows App.
 
 # Supercolor
 
@@ -20,6 +20,9 @@ Supercolor is a PyQt6-based GUI application that uses deep learning models to co
 - **GAN Training with Pretrained Generator**: Start GAN training with a pretrained generator.
 - **Loss Functions**: Uses L1 Loss for pixel-wise accuracy, GAN Loss for realism, and L2 Regularization to prevent overfitting.
 - **Advanced Data Augmentation**: Random transformations to improve generalization, including brightness, contrast, perspective, blur, and rotation.
+- **Gradient Accumulation**: Reduces memory usage by accumulating gradients over multiple batches.
+- **Cosine Annealing Learning Rate**: Adjusts the learning rate dynamically for stable training.
+- **PatchGAN Discriminator**: Classifies image patches for improved adversarial learning.
 
 ## Installation
 
@@ -46,6 +49,7 @@ Supercolor follows a structured training process involving a **Generator Pretrai
 - L1 loss minimizes pixel-wise differences between grayscale and ground truth color images.
 - A warm-up phase can be configured to slowly increase the learning rate.
 - Training runs for a specified number of epochs, and models are auto-saved periodically.
+- Uses **gradient accumulation** to manage memory for larger batch sizes.
 
 #### 2. GAN Training
 - After the generator is pretrained, the GAN training phase begins.
@@ -63,10 +67,12 @@ Supercolor follows a structured training process involving a **Generator Pretrai
 ## Data Augmentation
 To improve model robustness, the dataset undergoes augmentation, including:
 - **Brightness & Contrast Adjustments**: Random brightness (±2%) and contrast (±3%).
+- **Saturation Adjustments**: Randomly enhances saturation (1.00 to 1.05 scale).
 - **Perspective Transformations**: Random distortions applied to simulate depth.
 - **Gaussian Blur**: Random blur effects with varying kernel sizes.
 - **Random Rotations**: Rotates images up to 45 degrees.
 - **Horizontal Flipping**: Randomly flips images left-right.
+- **Random Resize Scaling**: Applies random resizing to prevent overfitting.
 
 ## Model Architectures
 The application supports the following architectures:
@@ -74,7 +80,7 @@ The application supports the following architectures:
 - **EfficientNet B0**
 - **ResNet (18, 34, 50)**
 
-## Parameter List (512x512 Resolution)
+## Parameter List with DynamicUNET (512x512 Resolution)
 | Model | Parameters |
 |--------|------------|
 | ShuffleNet v2 x0.5 | 5,714,129 |
@@ -88,3 +94,4 @@ The application supports the following architectures:
 
 ## License
 This project is licensed under the MIT License.
+
