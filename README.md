@@ -43,6 +43,7 @@ python maingui.py
 
 ### Training Process
 Supercolor follows a structured training process involving a **Generator Pretraining Phase** followed by **GAN Training**.
+**Set WarmUp and Gen. to 0 to skip Pretraining and start GAN directly.**
 
 #### 1. Generator Pretraining
 - The generator is trained **without a discriminator** using L1 loss.
