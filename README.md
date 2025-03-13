@@ -13,7 +13,7 @@ Supercolor is a PyQt6-based GUI application that uses deep learning models to co
 - **GUI with PyQt6**: User-friendly interface for easy interaction.
 - **Model Selection**: Choose from multiple architectures like ResNet, EfficientNet, and ShuffleNet.
 - **GPU Acceleration**: Utilizes CUDA if available for faster processing.
-- **Batch Processing**: Supports colorizing multiple images at once.
+- **Batch Processing**: Processes multiple images sequentially from a selected folder.
 - **Custom Training**: Train and fine-tune a model using a dataset of RGB images, where the model learns to predict color information from grayscale input in the L*a*b* color space.
 - **Auto-Save Checkpoints**: Automatically saves the model at regular intervals.
 - **Adjustable Warm-Up for Generator Training**: Customize warm-up epochs before full training.
